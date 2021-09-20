@@ -1,0 +1,37 @@
+module my_and(opA, opB, cout);
+	input [31:0] opA, opB;
+	output [31:0]cout;
+	
+	and my_and0(cout[0], opA[0], opB[0]);
+	and my_and1(cout[1], opA[1], opB[1]);
+	and my_and2(cout[2], opA[2], opB[2]);
+	and my_and3(cout[3], opA[3], opB[3]);
+	and my_and4(cout[4], opA[4], opB[4]);
+	and my_and5(cout[5], opA[5], opB[5]);
+	and my_and6(cout[6], opA[6], opB[6]);
+	and my_and7(cout[7], opA[7], opB[7]);
+	and my_and8(cout[8], opA[8], opB[8]);
+	and my_and9(cout[9], opA[9], opB[9]);
+	and my_and10(cout[10], opA[10], opB[10]);
+	and my_and11(cout[11], opA[11], opB[11]);
+	and my_and12(cout[12], opA[12], opB[12]);
+	and my_and13(cout[13], opA[13], opB[13]);
+	and my_and14(cout[14], opA[14], opB[14]);
+	and my_and15(cout[15], opA[15], opB[15]);
+	and my_and16(cout[16], opA[16], opB[16]);
+	and my_and17(cout[17], opA[17], opB[17]);
+	and my_and18(cout[18], opA[18], opB[18]);
+	and my_and19(cout[19], opA[19], opB[19]);
+	and my_and20(cout[20], opA[20], opB[20]);
+	and my_and21(cout[21], opA[21], opB[21]);
+	and my_and22(cout[22], opA[22], opB[22]);
+	and my_and23(cout[23], opA[23], opB[23]);
+	and my_and24(cout[24], opA[24], opB[24]);
+	and my_and25(cout[25], opA[25], opB[25]);
+	and my_and26(cout[26], opA[26], opB[26]);
+	and my_and27(cout[27], opA[27], opB[27]);
+	and my_and28(cout[28], opA[28], opB[28]);
+	and my_and29(cout[29], opA[29], opB[29]);
+	and my_and30(cout[30], opA[30], opB[30]);
+	and my_and31(cout[31], opA[31], opB[31]);
+endmodule

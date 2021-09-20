@@ -30,17 +30,19 @@ module alu_tb();
         clock = 1'b0;    // at time 0
         errors = 0;
 
-        //checkOr();
-        //checkAnd();
+        checkOr();
+        checkAnd();
         checkAdd();
         checkSub();
-		  //check();
-        //checkSLL();
-        //checkSRA();
+        checkSLL();
+        checkSRA();
 
-        //checkNE();
-        //checkLT();
+        checkNE();
+        checkLT();
         checkOverflow();
+		  
+		  check_add();
+		  check_sra();
 
         if(errors == 0) begin
             $display("The simulation completed without errors");
@@ -55,6 +57,100 @@ module alu_tb();
     // Clock generator
     always
          #10     clock = ~clock;
+
+	 task check_add;
+		begin
+			@(negedge clock);
+			assign ctrl_ALUopcode = 5'b00000;
+			assign ctrl_shiftamt = 5'b00000;
+
+			assign data_operandA = 32'h00000000;
+			assign data_operandB = 32'h00000000;
+
+			@(negedge clock);
+			if(data_result !== 32'h00000000) begin
+				 $display("**Error in ADD (test *1); expected: %h, actual: %h", 32'h00000000, data_result);
+				 errors = errors + 1;
+			end
+
+			for(index = 0; index < 31; index = index + 1)
+			begin
+				 @(negedge clock);
+				 assign data_operandA = 32'hffffffff << index;
+				 assign data_operandB = 32'hffffffff << index;
+
+				 assign data_expected = 32'hffffffff << (index + 1);
+
+				 @(negedge clock);
+				 if(data_result !== data_expected) begin
+					  $display("**Error in ADD (test *17 part %d); expected: %h, actual: %h", index, data_expected, data_result);
+					  errors = errors + 1;
+				 end
+			end
+		end
+    endtask
+	 
+	 task check_sra;
+		begin
+			@(negedge clock);
+			assign ctrl_ALUopcode = 5'b00101;
+			assign data_operandB = 32'h00000000;
+
+			assign data_operandA = 32'h00000001;
+			assign ctrl_shiftamt = 5'b00000;
+
+			@(negedge clock);
+			if(data_result !== 32'h00000001) begin
+				 $display("**Error in SRA (test *12); expected: %h, actual: %h", 32'h00000001, data_result);
+				 errors = errors + 1;
+			end
+
+			for(index = 0; index < 5; index = index + 1)
+			begin
+				 @(negedge clock);
+				 assign data_operandA = 32'h00000001;
+				 assign ctrl_shiftamt = 5'b00001 << index;
+
+				 assign data_expected = 32'h00000001 >>> (2**index);
+
+				 @(negedge clock);
+				 if(data_result !== data_expected) begin
+					  $display("**Error in SRA (test *18 part %d); expected: %h, actual: %h", index, data_expected, data_result);
+					  errors = errors + 1;
+				 end
+			end
+
+			for(index = 0; index < 4; index = index + 1)
+			begin
+				 @(negedge clock);
+				 assign data_operandA = 32'h00000001;
+				 assign ctrl_shiftamt = 5'b00011 << index;
+
+				 assign data_expected = 32'h00000001 >>> ((2**index) + (2**(index + 1)));
+
+				 @(negedge clock);
+				 if(data_result !== data_expected) begin
+					  $display("**Error in SRA (test *19 part %d); expected: %h, actual: %h", index, data_expected, data_result);
+					  errors = errors + 1;
+				 end
+			end
+			
+			for(index = 0; index < 4; index = index + 1)
+			begin
+				 @(negedge clock);
+				 assign data_operandA = 32'hf0000001;
+				 assign ctrl_shiftamt = 5'b00011 << index;
+
+				 assign data_expected = $signed(32'hf0000001) >>> ((2**index) + (2**(index + 1)));
+
+				 @(negedge clock);
+				 if(data_result !== data_expected) begin
+					  $display("**Error in SRA (test *20 part %d); expected: %h, actual: %h", index, data_expected, data_result);
+					  errors = errors + 1;
+				 end
+			end
+		end
+	 endtask
 
     task checkOr;
         begin
@@ -181,39 +277,6 @@ module alu_tb();
             end
         end
     endtask
-	 
-	 task check;
-		begin
-			@(negedge clock);
-            assign ctrl_ALUopcode = 5'b00000;
-            assign ctrl_shiftamt = 5'b00000;
-
-            assign data_operandA = 32'h00000000;
-            assign data_operandB = 32'h00000000;
-
-            @(negedge clock);
-            if(data_result !== 32'h00000000) begin
-                $display("**Error in ADD (test *1); expected: %h, actual: %h", 32'h00000000, data_result);
-                errors = errors + 1;
-            end
-
-            for(index = 0; index < 31; index = index + 1)
-            begin
-                @(negedge clock);
-                assign data_operandA = 32'hffffffff << index;
-                assign data_operandB = 32'hffffffff << index;
-
-                assign data_expected = 32'hffffffff << (index + 1);
-
-                @(negedge clock);
-                if(data_result !== data_expected) begin
-                    $display("**Error in ADD (test 17 part %d); expected: %h, actual: %h", index, data_expected, data_result);
-                    errors = errors + 1;
-                end
-            end
-        end
-    endtask
-			
 
     task checkSub;
         begin
@@ -310,6 +373,37 @@ module alu_tb();
                 $display("**Error in isNotEqual (test 13); expected: %b, actual: %b", 1'b0, isNotEqual);
                 errors = errors + 1;
             end
+				
+				// Not Equal with overflow
+            @(negedge clock);
+            assign data_operandA = 32'h80000001;
+            assign data_operandB = 32'h7FFFFFFF;
+
+            @(negedge clock);
+            if(isNotEqual !== 1'b1) begin
+                $display("**Error in isNotEqual (test *13); expected: %b, actual: %b", 1'b1, isNotEqual);
+                errors = errors + 1;
+            end
+				
+				@(negedge clock);
+            assign data_operandA = 32'h80000001;
+            assign data_operandB = 32'h80000001;
+
+            @(negedge clock);
+            if(isNotEqual !== 1'b0) begin
+                $display("**Error in isNotEqual (test **13); expected: %b, actual: %b", 1'b0, isNotEqual);
+                errors = errors + 1;
+            end
+				
+				@(negedge clock);
+            assign data_operandA = 32'h70000001;
+            assign data_operandB = 32'h70000001;
+
+            @(negedge clock);
+            if(isNotEqual !== 1'b0) begin
+                $display("**Error in isNotEqual (test ***13); expected: %b, actual: %b", 1'b0, isNotEqual);
+                errors = errors + 1;
+            end
         end
     endtask
 
@@ -346,6 +440,16 @@ module alu_tb();
             @(negedge clock);
             if(isLessThan !== 1'b1) begin
                 $display("**Error in isLessThan (test 24); expected: %b, actual: %b", 1'b1, isLessThan);
+                errors = errors + 1;
+            end
+				
+				@(negedge clock);
+            assign data_operandA = 32'h80000001;
+            assign data_operandB = 32'h80000001;
+
+            @(negedge clock);
+            if(isLessThan !== 1'b0) begin
+                $display("**Error in isLessThan (test *24); expected: %b, actual: %b", 1'b0, isLessThan);
                 errors = errors + 1;
             end
         end
