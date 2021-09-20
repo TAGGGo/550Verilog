@@ -48,7 +48,7 @@ Operation | ALU Opcode | Description
 **ADD** | 00000 | data_operandA + data_operandB
 **SUBTRACT** | 00001 | data_operandA - data_operandB
 **AND** | 00010 | data_operandA & data_operandB
-**OR** | 00011 | data_operandA | data_operandB
+**OR** | 00011 | data_operandA \| data_operandB
 **SLL** | 00100 | data_operandA << ctrl_shiftamt
 **SRA** | 00101 | data_operandA >> ctrl_shiftamt
 
@@ -59,5 +59,5 @@ Signals | Type | Description
 **ctrl_shiftamt** | input | Shift amount for SLL and SRA operations
 **isNotEqual** | output | Asserts true **iff** data_operandA and data_operandB are not equal
 **isLessThan** | output | Asserts true **iff** data_operandA is **strictly** less than data_operandB
-**overflow** | output | data_operandA | Asserts true **iff** there is an overflow in ADD or SUBTRACT
+**overflow** | output | Asserts true **iff** there is an overflow in ADD or SUBTRACT
 
