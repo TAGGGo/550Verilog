@@ -65,7 +65,7 @@ always
   </tr>
 </table>
 
->We can see that the limitation is 0.05ns, which means the register file would not make an error if the clock changes every 0.5ns. The frequency is 20 billion Hz(1/0.05ns).
+>We can see that the limitation is 0.05ns, which means the register file would not make an error if the clock changes every 0.05ns. The frequency is 20 billion Hz(1/0.05ns).
 
 ### Bugs or issues encountered
 
