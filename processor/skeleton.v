@@ -20,10 +20,12 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
     */
     output imem_clock, dmem_clock, processor_clock, regfile_clock;
 	 
-	 assign dmem_clock = clock;
-	 assign regfile_clock = ~clock;
-	 clock_divider divider(clock, reset, processor_clock);
-	 assign imem_clock = ~processor_clock;
+	 assign dmem_clock = ~clock;
+	 assign imem_clock = ~clock;
+	 assign regfile_clock = clock;
+	 wire devide_by_two_clock;
+	 clock_divider divider0(clock, reset, devide_by_two_clock);
+	 clock_divider divider1(devide_by_two_clock, reset, processor_clock);
 	 
     /** IMEM **/
     // Figure out how to generate a Quartus syncram component and commit the generated verilog file.

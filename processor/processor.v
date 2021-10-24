@@ -76,7 +76,7 @@ module processor(
     // Control signals
     input clock, reset;
 
-    // Imem
+    // Imem & PC
     output reg [11:0] address_imem;
     input [31:0] q_imem;
 
@@ -100,13 +100,16 @@ module processor(
 	 output [31:0] data_B;
 	 wire isNotEqual, isLessThan, overflow;
 	 wire [4:0] opt_code;
+	 wire [31:0] true_overflow_val;
 	 assign opt_code = (q_imem[31:27] == 5'b00000) ? q_imem[6:2] : 5'b00000;
 	 assign data_A = data_readRegA;
 	 assign data_B = (q_imem[31:27] == 5'b00000) ? data_readRegB : ({{15{q_imem[16]}}, q_imem[16:0]});
+	 assign true_overflow_val = q_imem[31:27] == 5'b00000 ? ((q_imem[6:2] == 5'b00000) ? 32'd1 : (q_imem[6:2] == 5'b00001 ? 32'd3 : 32'd0))
+											: (q_imem[31:27] == 5'b00101 ? 32'd2 : 32'd0);
 	 alu core_alu(data_A, data_B, opt_code,
 			q_imem[11:7], data_result, isNotEqual, isLessThan, overflow);
 	 
-	 // Imem
+	 // Imem & PC
 	 always @(posedge clock, posedge reset) begin
 		if(reset) begin
 			address_imem <= 12'b0;		
@@ -121,13 +124,13 @@ module processor(
 	 assign wren = (q_imem[31:27] == 5'b00111) ? 1'b1 : 1'b0;
 	 
 	 // Regfile
+	 wire [31:0] tmp_data_writeReg;
+	 assign tmp_data_writeReg = (q_imem[31:27] == 5'b01000) ? q_dmem : data_result;
 	 assign ctrl_writeEnable = clock & ((q_imem[31:27] == 5'b00000 | q_imem[31:27] == 5'b01000 | q_imem[31:27] == 5'b00101) ? 1'b1 : 1'b0);
-    assign data_writeReg = (q_imem[31:27] == 5'b01000) ? q_dmem : data_result;
+    assign data_writeReg = (true_overflow_val != 32'd0 & overflow) ? true_overflow_val : tmp_data_writeReg;
 	 assign ctrl_readRegA = q_imem[21:17];
-	 // sw need $rd, other's need $rt
 	 assign ctrl_readRegB = (q_imem[31:27] == 5'b00111) ? q_imem[26:22] : q_imem[16:12];
-	 // assign ctrl_writeReg = (q_imem[31:27] == 5'b00000) ? q_imem[26:22] : q_imem[21:17];
-	 assign ctrl_writeReg = q_imem[26:22];
+	 assign ctrl_writeReg = (true_overflow_val != 32'd0 & overflow) ? 5'd30 : q_imem[26:22];
 	 
 	 
 endmodule
