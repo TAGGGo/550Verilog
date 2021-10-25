@@ -1,4 +1,13 @@
 */*.bak
 */*.rpt
 */*/
+!*/mif_outputs/*
 */*.txt
+*/*.done
+*/*.fit.*
+*/*.pin
+*/*.sld
+*/*.sof
+*/*.sta.*
+*/*.map.*
+*/*.jdi
