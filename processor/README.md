@@ -30,15 +30,61 @@
 ```
 module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_clock, wren, address_imem, q_imem, address_dmem, q_dmem, data, ctrl_writeEnable, ctrl_writeReg, ctrl_readRegA, ctrl_readRegB, data_writeReg, data_readRegA, data_readRegB, data_A, data_B);
     /** IMEM **/
-
+    imem my_imem(
+        .address    (address_imem),            // address of data
+        .clock      (imem_clock),                  // you may need to invert the clock
+        .q          (q_imem)                   // the raw instruction
+    );
     /** DMEM **/
-
+    dmem my_dmem(
+        .address    (address_dmem/* 12-bit wire */),       // address of data
+        .clock      (dmem_clock),                  // may need to invert the clock
+        .data	    (data/* 32-bit data in */),    // data you want to write
+        .wren	    (wren/* 1-bit signal */),      // write enable
+        .q          (q_dmem/* 32-bit data out */)    // data from dmem
+    );
     /** REGFILE **/
-
+    regfile my_regfile(
+        regfile_clock,
+        ctrl_writeEnable,
+        reset,
+        ctrl_writeReg,
+        ctrl_readRegA,
+        ctrl_readRegB,
+        data_writeReg,
+        data_readRegA,
+        data_readRegB
+    );
     /** PROCESSOR **/
+    processor my_processor(
+        // Control signals
+        processor_clock,                          // I: The master clock
+        reset,                          // I: A reset signal
+
+        // Imem
+        address_imem,                   // O: The address of the data to get from imem
+        q_imem,                         // I: The data from imem
+
+        // Dmem
+        address_dmem,                   // O: The address Fof the data to get or put from/to dmem
+        data,                           // O: The data to write to dmem
+        wren,                           // O: Write enable for dmem
+        q_dmem,                         // I: The data from dmem
+
+        // Regfile
+        ctrl_writeEnable,               // O: Write enable for regfile
+        ctrl_writeReg,                  // O: Register to write to in regfile
+        ctrl_readRegA,                  // O: Register to read from port A of regfile
+        ctrl_readRegB,                  // O: Register to read from port B of regfile
+        data_writeReg,                  // O: Data to write to for regfile
+        data_readRegA,                  // I: Data from port A of regfile
+        data_readRegB,                   // I: Data from port B of regfile
+		  data_A,
+		  data_B
+    );
 endmodule
 ```
 
 ### Bugs or issues encountered
 
-While writing regfile, I found that there was a warning that showed that Design contains combinational loop of 585 nodes after we added the overflow feature. It might because the given file alu.v using behavioural verilog and the design become too complicated.
+When testing the waveform of processor, we labeled all the components in processor as "output" in skeleton. It generated error "Design contains combinational loop of 585 nodes after we added the overflow feature". After we renamed those "output" into "wire", things got solved.
