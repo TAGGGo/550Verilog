@@ -1,10 +1,12 @@
 # ECE550 Processor Project
 
 ### Assignments
-* [Processor](https://docs.google.com/document/d/1zV90qzHWJHSYq9R-bINMuFR3Ofr0463e-bUarTt1WJ0/edit)
+* [Processor Checkpoint 4](https://docs.google.com/document/d/1zV90qzHWJHSYq9R-bINMuFR3Ofr0463e-bUarTt1WJ0/edit)
+* [Processor Checkpoint 5](https://docs.google.com/document/d/1GRECE0IlpsEvEKdVMAwLbKDPVsT8RTx7MYurCkVbO4s/edit)
 > Design and simulate a Processor using Verilog with function:
 >* R-type instructions (add, sub, and, or)
 >* I-type instructions (addi, sll, sra, sw, lw)
+>* J-type instructions (j, jal, jr, bne, blt, bex, setx)
 
 
 ### Members:
@@ -19,11 +21,11 @@
     │   ├── processor.v 
     │   ├── alu.v 
     │   ├── regfile.v
-    │   ├── imem.v
-    │   ├── dmem.v
+    │   ├── imem.v (removed for grading)
+    │   ├── dmem.v (removed for grading)
     │   └── clock_divider.v
-    ├── imem.mif
-    └── dmem.mif
+    ├── imem.mif (removed for grading)
+    └── dmem.mif (removed for grading)
 
 ### Module Interface
 
@@ -87,4 +89,7 @@ endmodule
 
 ### Bugs or issues encountered
 
-When testing the waveform of processor, we labeled all the components in processor as "output" in skeleton. It generated error "Design contains combinational loop of 585 nodes after we added the overflow feature". After we renamed those "output" into "wire", things got solved.
+When dubugging we found that ctrl_writeEnable did not function well as expected. It is due to some J types need to write to regfile but I did not accommodate for that.
+
+### Test method
+We used waveform time simulation to test it's functionality.
