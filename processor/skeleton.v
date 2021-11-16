@@ -9,7 +9,7 @@
  * inspect which signals the processor tries to assert when.
  */
 
-module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_clock);
+module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_clock, address_imem, q_imem, ctrl_writeReg, ctrl_readRegA, ctrl_readRegB, data_writeReg, data_readRegA, data_readRegB, ctrl_writeEnable);
     input clock, reset;
     /* 
         Create four clocks for each module from the original input "clock".
@@ -20,19 +20,20 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
     */
     output imem_clock, dmem_clock, processor_clock, regfile_clock;
 	 
-	 assign dmem_clock = ~clock;
-	 assign imem_clock = ~clock;
-	 assign regfile_clock = clock;
 	 // processor clock has been devided by 4
-	 wire devide_by_two_clock;
+	 wire devide_by_two_clock, devide_by_four_clock;
 	 clock_divider divider0(clock, reset, devide_by_two_clock);
-	 clock_divider divider1(devide_by_two_clock, reset, processor_clock);
-	 
+	 clock_divider divider1(devide_by_two_clock, reset, devide_by_four_clock);
+	 assign imem_clock = clock;
+	 assign dmem_clock = devide_by_two_clock;
+	 assign regfile_clock = devide_by_four_clock;
+	 assign processor_clock = devide_by_four_clock;
+	 //clock_divider divider2(devide_by_four_clock, reset, processor_clock);
     /** IMEM **/
     // Figure out how to generate a Quartus syncram component and commit the generated verilog file.
     // Make sure you configure it correctly!
-    wire [11:0] address_imem;
-    wire [31:0] q_imem;
+    output [11:0] address_imem;
+    output [31:0] q_imem;
     imem my_imem(
         .address    (address_imem),            // address of data
         .clock      (imem_clock),                  // you may need to invert the clock
@@ -56,10 +57,10 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
 
     /** REGFILE **/
     // Instantiate your regfile
-    wire ctrl_writeEnable;
-    wire [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
-    wire [31:0] data_writeReg;
-    wire [31:0] data_readRegA, data_readRegB;
+    output ctrl_writeEnable;
+    output [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
+    output [31:0] data_writeReg;
+    output [31:0] data_readRegA, data_readRegB;
 	 wire [31:0] data_A, data_B;
     regfile my_regfile(
         regfile_clock,

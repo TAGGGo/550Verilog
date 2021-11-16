@@ -114,6 +114,12 @@ module processor(
 		if(reset) begin
 			address_imem <= 12'b0;		
 		end
+		else if(q_imem[31:27] == 5'b00001 | q_imem[31:27] == 5'b00011 | (q_imem[31:27] == 5'b10110 & data_readRegA != 32'd0))
+			address_imem <= q_imem[11:0]; //???
+		else if((q_imem[31:27] == 5'b00010 & data_readRegA != data_readRegB) | (q_imem[31:27] == 5'b00110 & data_readRegB < data_readRegA))
+			address_imem <= address_imem + 12'd1 + q_imem[11:0];//???
+		else if(q_imem[31:27] == 5'b00100)
+			address_imem <= data_readRegB[11:0];//???
 		else
 			address_imem <= address_imem + 12'd1;
     end
@@ -125,12 +131,14 @@ module processor(
 	 
 	 // Regfile
 	 wire [31:0] tmp_data_writeReg;
-	 assign tmp_data_writeReg = (q_imem[31:27] == 5'b01000) ? q_dmem : data_result;
-	 assign ctrl_writeEnable = clock & ((q_imem[31:27] == 5'b00000 | q_imem[31:27] == 5'b01000 | q_imem[31:27] == 5'b00101) ? 1'b1 : 1'b0);
-    assign data_writeReg = (true_overflow_val != 32'd0 & overflow) ? true_overflow_val : tmp_data_writeReg;
-	 assign ctrl_readRegA = q_imem[21:17];
-	 assign ctrl_readRegB = (q_imem[31:27] == 5'b00111) ? q_imem[26:22] : q_imem[16:12];
-	 assign ctrl_writeReg = (true_overflow_val != 32'd0 & overflow) ? 5'd30 : q_imem[26:22];
+	 assign tmp_data_writeReg = (q_imem[31:27] == 5'b01000) ? q_dmem : (q_imem[31:27] == 5'b10101 ? ({{5{q_imem[26]}}, q_imem[26:0]}) : data_result);
+	 assign ctrl_writeEnable = ~clock & ((q_imem[31:27] == 5'b00011 | q_imem[31:27] == 5'b10101 | q_imem[31:27] == 5'b00000 | q_imem[31:27] == 5'b01000 | q_imem[31:27] == 5'b00101) ? 1'b1 : 1'b0);
+    assign data_writeReg = (true_overflow_val != 32'd0 & overflow) ? true_overflow_val : (q_imem[31:27] == 5'b00011 ? address_imem + 1 : tmp_data_writeReg);
+	 // $rs
+	 assign ctrl_readRegA = q_imem[31:27] == 5'b10110 ? 5'd30 : q_imem[21:17];
+	 // $rd/$rt
+	 assign ctrl_readRegB = (q_imem[31:27] == 5'b00111 | q_imem[31:27] == 5'b00010 | q_imem[31:27] == 5'b00110 | q_imem[31:27] == 5'b00100) ? q_imem[26:22] : q_imem[16:12];
+	 assign ctrl_writeReg = ((true_overflow_val != 32'd0 & overflow) | (q_imem[31:27] == 5'b10101)) ? 5'd30 : (q_imem[31:27] == 5'b00011 ? 5'd31 : q_imem[26:22]);
 	 
 	 
 endmodule
