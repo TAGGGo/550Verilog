@@ -115,11 +115,11 @@ module processor(
 			address_imem <= 12'b0;		
 		end
 		else if(q_imem[31:27] == 5'b00001 | q_imem[31:27] == 5'b00011 | (q_imem[31:27] == 5'b10110 & data_readRegA != 32'd0))
-			address_imem <= q_imem[11:0]; //???
+			address_imem <= q_imem[11:0];
 		else if((q_imem[31:27] == 5'b00010 & data_readRegA != data_readRegB) | (q_imem[31:27] == 5'b00110 & data_readRegB < data_readRegA))
-			address_imem <= address_imem + 12'd1 + q_imem[11:0];//???
+			address_imem <= address_imem + 12'd1 + q_imem[11:0];
 		else if(q_imem[31:27] == 5'b00100)
-			address_imem <= data_readRegB[11:0];//???
+			address_imem <= data_readRegB[11:0];
 		else
 			address_imem <= address_imem + 12'd1;
     end
